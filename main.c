@@ -31,12 +31,13 @@ lzw_dec_t lzwd;
 **  Return: error code
 ******************************************************************************/
 
-void read_file_to_buffer(void * buf, size_t elem_size, size_t max_len, FILE *file )
+int read_file_to_buffer(void * buf, size_t elem_size, FILE *file )
 {
-    fseek(file, 0, SEEK_END);
-    long fsize = max_len > (ftell(file) / elem_size) ? (ftell(file) / elem_size) : max_len;
     fseek(file, 0, SEEK_SET);
-    fread(buf, elem_size, fsize, file);
+    int data_size = 0;
+    fread(&data_size, sizeof(int), 1, file);
+    fread(buf, elem_size, data_size, file);
+    return data_size;
 }
 
 int main (int argc, char* argv[])
@@ -72,7 +73,7 @@ int main (int argc, char* argv[])
         fprintf(stderr, "Cannot open %s\n", argv[3]);
         return -3;
     }
-    read_file_to_buffer(ctx->dict, sizeof(node_lzw_t), DICT_SIZE, fdic);
+    read_file_to_buffer(ctx->dict, sizeof(node_lzw_t), fdic);
     //read_file_to_buffer(ctx->hash, sizeof(int), DICT_SIZE, fhash);
     fclose(fdic);
     lzw_dec_restore(ctx, fout, buf, BUF_SIZE);
