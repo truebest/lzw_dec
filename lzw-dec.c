@@ -26,10 +26,10 @@ static int lzw_dec_readbits(lzw_dec_t *const ctx, unsigned nbits)
 
 void lzw_dec_restore(lzw_dec_t *ctx, void *stream, char * buf, unsigned buf_size)
 {
-    ctx->code     = CODE_NULL; // non-existent code
+    ctx->code     = CODE_NULL;
     ctx->max      = 0;
     ctx->codesize = 17;
-    ctx->bb.n     = 0; // bitbuffer init
+    ctx->bb.n     = 0;
     ctx->e_buf    = buf;
     ctx->e_size   = buf_size;
     ctx->e_pos    = 0;
@@ -49,7 +49,7 @@ void lzw_dec_init(lzw_dec_t *ctx, void *stream, char * buf, unsigned buf_size)
     ctx->code     = CODE_NULL;
     ctx->max      = 255;
     ctx->codesize = 8;
-    ctx->bb.n     = 0; // bitbuffer init
+    ctx->bb.n     = 0;
     ctx->e_buf    = buf;
     ctx->e_size   = buf_size;
     ctx->e_pos    = 0;
@@ -160,9 +160,9 @@ int lzw_decode(lzw_dec_t *ctx, char * buf, unsigned size)
 {
     if (!size) return 0;
 
-    ctx->inbuff = buf;	// save ptr to code-buffer
-    ctx->lzwn   = 0;	// current position in code-buffer
-    ctx->lzwm   = size;	// code-buffer data size
+    ctx->inbuff = buf;
+    ctx->lzwn   = 0;
+    ctx->lzwm   = size;
 
     for (;;)
     {
@@ -174,7 +174,7 @@ int lzw_decode(lzw_dec_t *ctx, char * buf, unsigned size)
         printf("code %x (%d)\n", ncode, ctx->codesize);
 #endif
 
-        // check the input for EOF
+        // еще не конец данных ?
         if (ncode < 0)
         {
 #if DEBUG
@@ -185,26 +185,23 @@ int lzw_decode(lzw_dec_t *ctx, char * buf, unsigned size)
         }
 
 #ifndef DISABLE_ADD_NEW_NODE
-        else if (ncode <= ctx->max) // known code
+        else if (ncode <= ctx->max) // если код известен
         {
-            // output string for the new code from dictionary
+            // строка вывода для нового кода из словаря
             ctx->c = lzw_dec_writestr(ctx, ncode);
 
-            // add <prev code str>+<first str symbol> to the dictionary
+            // добавить в словарь <prev code str> + <first str symbol>
             if (lzw_dec_addstr(ctx, ctx->code, ctx->c) == CODE_NULL)
                 return LZW_ERR_DICT_IS_FULL;
         }
-        else // unknown code
+        else // если неизвестен
         {
-            // try to guess the code
             if (ncode != ctx->max+1)
                 return LZW_ERR_WRONG_CODE;
 
-            // create code: <nc> = <code> + <c> wich is equal to ncode
             if (lzw_dec_addstr(ctx, ctx->code, ctx->c) == CODE_NULL)
                 return LZW_ERR_DICT_IS_FULL;
 
-            // output string for the new code from dictionary
             ctx->c = lzw_dec_writestr(ctx, ncode);
         }
 #else

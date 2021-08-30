@@ -2,7 +2,7 @@
 
 // не устанавливайте DICT_SIZE> 24 бит (32-битный буфер слишком короткий)
 #define DICT_SIZE	(1 << 18)
-#define CODE_NULL	DICT_SIZE
+#define CODE_NULL	(0x01000000)
 #define HASH_SIZE	(DICT_SIZE)
 
 #define LZW_ERR_DICT_IS_FULL	-1
@@ -13,17 +13,16 @@
 #define OUTPUT_FILE
 //#define OUTPUT_BUFFER
 
-// bit-buffer
+// бит-буфер
 typedef struct _bitbuffer
 {
     unsigned long buf;		// bits
     unsigned n;				// number of bits
 }bitbuffer_t;
 
-// LZW encoder node, represents a string
-
 #pragma pack(push, 1)
 
+// Узел кодировщика
 typedef struct _node_lzw
 {
     int           prev;		// prefix code
@@ -33,7 +32,7 @@ typedef struct _node_lzw
 
 #pragma pack(pop)
 
-// LZW encoder context
+// LZW контекст кодера
 typedef struct _lzw_enc
 {
     int           code;				// current code
@@ -51,7 +50,7 @@ typedef struct _lzw_enc
     char          en_dic;
 }lzw_enc_t;
 
-// LZW decoder context
+// LZW контекст декодера
 typedef struct _lzw_dec
 {
     int           code;				// current code
